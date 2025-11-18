@@ -121,7 +121,7 @@ npm start
 ## 🛠️ Công nghệ Sử dụng
 
 ### Backend
-- **Node.js** - Runtime
+- **Node.js** - Runtime, SocketIO
 - **Express** - Web framework
 - **Socket.IO** - Real-time communication
 - **MongoDB** - Database
