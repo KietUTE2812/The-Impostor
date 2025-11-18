@@ -20,12 +20,12 @@ interface GameResult {
   votedOutPlayer: {
     socketId: string;
     username: string;
-    role: string;
-  };
+    role: 'crewmate' | 'impostor';
+  } | null;
   isImpostor: boolean;
   winner: string;
   keyword: string;
-  votes: { [key: string]: number };
+  votes: Record<string, number>;
 }
 
 interface GameContextType {
@@ -40,11 +40,15 @@ interface GameContextType {
   category: string | null;
   keyword: string | null;
   gameState: 'LOBBY' | 'PLAYING' | 'VOTING' | 'RESULT';
-  gameResults: GameResult;
-  currentTurn: { playerId: string; username: string; round: number } | null;
+  gameResult: GameResult | null;
+  currentTurn: string | null;
+  currentRound: number;
+  totalRounds: number;
   wordHistory: WordHistoryItem[];
+  errorMessage: string | null;
   createRoom: () => void;
   joinRoom: (roomId: string) => void;
+  leaveRoom: () => void;
   startGame: () => void;
   submitWord: (word: string) => void;
   castVote: (votedPlayerId: string) => void;
@@ -63,9 +67,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [category, setCategory] = useState<string | null>(null);
   const [keyword, setKeyword] = useState<string | null>(null);
   const [gameState, setGameState] = useState<'LOBBY' | 'PLAYING' | 'VOTING' | 'RESULT'>('LOBBY');
-  const [currentTurn, setCurrentTurn] = useState<{ playerId: string; username: string; round: number } | null>(null);
+  const [currentTurn, setCurrentTurn] = useState<string | null>(null);
+  const [currentRound, setCurrentRound] = useState(1);
+  const [totalRounds, setTotalRounds] = useState(3);
   const [wordHistory, setWordHistory] = useState<WordHistoryItem[]>([]);
-  const [gameResults, setGameResults] = useState<GameResult>({} as GameResult);
+  const [gameResult, setGameResult] = useState<GameResult | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001');
@@ -107,7 +114,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
     });
 
     socket.on('nextTurn', ({ playerId, username, round }) => {
-      setCurrentTurn({ playerId, username, round });
+      setCurrentTurn(playerId);
+      setCurrentRound(round);
     });
 
     socket.on('wordSubmitted', ({ wordHistory }) => {
@@ -121,7 +129,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
     socket.on('gameResult', (result : GameResult) => {
       setGameState('RESULT');
-      setGameResults(result);
+      setGameResult(result);
     });
 
     socket.on('gameReset', ({ players }) => {
@@ -134,8 +142,19 @@ export function GameProvider({ children }: { children: ReactNode }) {
       setWordHistory([]);
     });
 
+    socket.on('gamePaused', ({ reason, players }) => {
+      setErrorMessage(reason);
+      setGameState('LOBBY');
+      setPlayers(players);
+      setRole(null);
+      setCategory(null);
+      setKeyword(null);
+      setCurrentTurn(null);
+      setWordHistory([]);
+    });
+
     socket.on('error', ({ message }) => {
-      alert(message);
+      setErrorMessage(message);
     });
 
     return () => {
@@ -163,6 +182,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
       socket.emit('joinRoom', { username, roomId });
     }
   };
+
+  const leaveRoom = () => {
+    if (socket) {
+      socket.emit('leaveRoom', { roomId });
+    }
+  }
 
   const startGame = () => {
     
@@ -202,11 +227,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
     category,
     keyword,
     gameState,
-    gameResults,
+    gameResult,
     currentTurn,
+    currentRound,
+    totalRounds,
     wordHistory,
+    errorMessage,
     createRoom,
     joinRoom,
+    leaveRoom,
     startGame,
     submitWord,
     castVote,

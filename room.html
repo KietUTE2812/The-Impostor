@@ -1,0 +1,1015 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Whispering Game - The Gathering</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&amp;family=Philosopher:wght@400;700&amp;family=Raleway:ital,wght@0,300;0,400;0,500;0,600;1,400&amp;display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Raleway', sans-serif;
+            background: #0D1B2A;
+            color: #E0E1DD;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Animated Background */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: radial-gradient(ellipse at center, #1B263B 0%, #0D1B2A 50%, #000000 100%);
+        }
+
+        .background::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20% 30%, rgba(0, 255, 245, 0.3), transparent),
+                radial-gradient(2px 2px at 60% 70%, rgba(157, 78, 221, 0.3), transparent),
+                radial-gradient(1px 1px at 50% 50%, rgba(224, 225, 221, 0.2), transparent),
+                radial-gradient(1px 1px at 80% 10%, rgba(224, 225, 221, 0.2), transparent),
+                radial-gradient(2px 2px at 90% 60%, rgba(255, 107, 157, 0.2), transparent),
+                radial-gradient(1px 1px at 33% 80%, rgba(224, 225, 221, 0.2), transparent);
+            background-size: 200% 200%, 200% 200%, 300% 300%, 250% 250%, 280% 280%, 220% 220%;
+            background-position: 0% 0%;
+            animation: stars 40s ease-in-out infinite;
+        }
+
+        @keyframes stars {
+            0%, 100% { background-position: 0% 0%, 100% 100%, 50% 50%, 80% 20%, 20% 80%, 40% 60%; }
+            50% { background-position: 100% 100%, 0% 0%, 80% 80%, 20% 60%, 60% 40%, 90% 20%; }
+        }
+
+        /* Ritual Circle Background */
+        .ritual-circle {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 900px;
+            height: 900px;
+            z-index: 1;
+            opacity: 0.15;
+            animation: rotateCircle 60s linear infinite;
+        }
+
+        @keyframes rotateCircle {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(0, 255, 245, 0.6);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 255, 245, 0.8);
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .particle:nth-child(2n) {
+            background: rgba(157, 78, 221, 0.6);
+            box-shadow: 0 0 10px rgba(157, 78, 221, 0.8);
+            animation-duration: 10s;
+        }
+
+        .particle:nth-child(3n) {
+            background: rgba(255, 107, 157, 0.5);
+            box-shadow: 0 0 8px rgba(255, 107, 157, 0.7);
+            animation-duration: 12s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translate(100px, -100px) rotate(360deg); opacity: 0; }
+        }
+
+        /* Header */
+        .header {
+            position: relative;
+            z-index: 100;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            background: rgba(13, 27, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 255, 245, 0.2);
+        }
+
+        .header-logo {
+            font-family: 'Cinzel', serif;
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00FFF5 0%, #9D4EDD 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+        }
+
+        .game-code-display {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .game-code-display:hover {
+            transform: scale(1.05);
+        }
+
+        .code-label {
+            font-family: 'Philosopher', sans-serif;
+            font-size: 20px;
+            color: #778DA9;
+            letter-spacing: 1px;
+        }
+
+        .code-value {
+            font-family: 'Philosopher', sans-serif;
+            font-size: 48px;
+            font-weight: 700;
+            color: #00FFF5;
+            letter-spacing: 4px;
+            text-shadow: 0 0 20px rgba(0, 255, 245, 0.6);
+            animation: codeGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes codeGlow {
+            0%, 100% { filter: drop-shadow(0 0 10px rgba(0, 255, 245, 0.5)); }
+            50% { filter: drop-shadow(0 0 20px rgba(0, 255, 245, 0.8)); }
+        }
+
+        .copy-icon {
+            font-size: 20px;
+            color: #9D4EDD;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .game-code-display:hover .copy-icon {
+            opacity: 1;
+            color: #00FFF5;
+        }
+
+        .leave-btn {
+            height: 44px;
+            padding: 0 24px;
+            background: transparent;
+            border: 2px solid #FF6B9D;
+            border-radius: 8px;
+            font-family: 'Raleway', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            color: #FF6B9D;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.5px;
+        }
+
+        .leave-btn:hover {
+            background: #FF6B9D;
+            color: #0D1B2A;
+            box-shadow: 0 0 20px rgba(255, 107, 157, 0.5);
+            transform: scale(1.05);
+        }
+
+        /* Main Container */
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px 120px;
+            display: grid;
+            grid-template-columns: 65% 35%;
+            gap: 48px;
+        }
+
+        /* Left Section - Players */
+        .players-section {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-family: 'Cinzel', serif;
+            font-size: 42px;
+            font-weight: 600;
+            color: #00FFF5;
+            text-align: center;
+            margin-bottom: 48px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(0, 255, 245, 0.6);
+        }
+
+        .players-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .player-card {
+            background: rgba(27, 38, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(0, 255, 245, 0.2);
+            border-radius: 12px;
+            padding: 24px;
+            height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .player-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 255, 245, 0.1), rgba(157, 78, 221, 0.1));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .player-card:hover::before {
+            opacity: 1;
+        }
+
+        .player-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 48px rgba(0, 255, 245, 0.2);
+            border-color: rgba(0, 255, 245, 0.4);
+        }
+
+        .player-card.ready {
+            border-color: rgba(157, 78, 221, 0.6);
+            box-shadow: 0 8px 32px rgba(157, 78, 221, 0.3);
+        }
+
+        .player-card.ready::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 2px solid rgba(157, 78, 221, 0.4);
+            border-radius: 12px;
+            animation: readyPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes readyPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.5; }
+        }
+
+        .player-card.empty {
+            border-style: dashed;
+            border-color: rgba(119, 141, 169, 0.3);
+            background: rgba(27, 38, 59, 0.4);
+        }
+
+        .player-card.empty:hover {
+            transform: none;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .player-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid rgba(0, 255, 245, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            background: linear-gradient(135deg, rgba(0, 255, 245, 0.2), rgba(157, 78, 221, 0.2));
+            box-shadow: 0 0 20px rgba(0, 255, 245, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .player-card:hover .player-avatar {
+            transform: rotate(5deg);
+        }
+
+        .player-card.ready .player-avatar {
+            border-color: rgba(157, 78, 221, 0.6);
+            box-shadow: 0 0 30px rgba(157, 78, 221, 0.5);
+        }
+
+        .host-crown {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            font-size: 20px;
+            color: #FFD700;
+            filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+            animation: crownFloat 2s ease-in-out infinite;
+        }
+
+        @keyframes crownFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        .player-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #E0E1DD;
+            letter-spacing: 0.5px;
+        }
+
+        .player-status {
+            font-size: 14px;
+            color: #9D4EDD;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .player-card.ready .player-status {
+            color: #00FFF5;
+        }
+
+        .empty-slot-text {
+            font-size: 16px;
+            color: #778DA9;
+            font-style: italic;
+        }
+
+        /* Right Section */
+        .info-section {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .info-panel {
+            background: rgba(27, 38, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 245, 0.2);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .info-panel:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 48px rgba(0, 255, 245, 0.2);
+            border-color: rgba(0, 255, 245, 0.4);
+        }
+
+        .ready-counter {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .counter-circle {
+            position: relative;
+            width: 160px;
+            height: 160px;
+        }
+
+        .counter-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Philosopher', sans-serif;
+            font-size: 64px;
+            font-weight: 700;
+            color: #00FFF5;
+            text-shadow: 0 0 30px rgba(0, 255, 245, 0.8);
+        }
+
+        .counter-status {
+            font-size: 16px;
+            color: #778DA9;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .settings-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .panel-header {
+            font-family: 'Cinzel', serif;
+            font-size: 24px;
+            font-weight: 600;
+            color: #9D4EDD;
+            text-align: center;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .setting-item {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .setting-label {
+            font-size: 14px;
+            color: #778DA9;
+            letter-spacing: 0.5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .setting-value {
+            color: #00FFF5;
+            font-weight: 600;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(65, 90, 119, 0.3);
+            appearance: none;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00FFF5, #9D4EDD);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 255, 245, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(0, 255, 245, 0.8);
+        }
+
+        .dropdown {
+            width: 100%;
+            height: 48px;
+            background: rgba(65, 90, 119, 0.3);
+            border: 2px solid rgba(0, 255, 245, 0.3);
+            border-radius: 8px;
+            padding: 0 16px;
+            font-family: 'Raleway', sans-serif;
+            font-size: 16px;
+            color: #E0E1DD;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown:focus {
+            outline: none;
+            border-color: #00FFF5;
+            background: rgba(65, 90, 119, 0.5);
+            box-shadow: 0 0 20px rgba(0, 255, 245, 0.3);
+        }
+
+        .invite-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .invite-btn {
+            height: 48px;
+            background: transparent;
+            border: 2px solid #9D4EDD;
+            border-radius: 8px;
+            font-family: 'Raleway', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            color: #9D4EDD;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .invite-btn:hover {
+            background: #9D4EDD;
+            color: #0D1B2A;
+            box-shadow: 0 0 20px rgba(157, 78, 221, 0.5);
+            transform: scale(1.02);
+        }
+
+        /* Start Button */
+        .start-button-container {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .start-btn {
+            width: 320px;
+            height: 64px;
+            background: linear-gradient(135deg, #9D4EDD 0%, #00FFF5 100%);
+            border: none;
+            border-radius: 8px;
+            font-family: 'Raleway', sans-serif;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: #E0E1DD;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(0, 255, 245, 0.5);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .start-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .start-btn:hover::before {
+            width: 400px;
+            height: 400px;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 50px rgba(0, 255, 245, 0.8), 0 0 80px rgba(157, 78, 221, 0.6);
+        }
+
+        .start-btn:active {
+            transform: scale(0.98);
+        }
+
+        .start-btn.ready {
+            animation: startPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes startPulse {
+            0%, 100% { 
+                box-shadow: 0 0 30px rgba(0, 255, 245, 0.5), 0 0 50px rgba(157, 78, 221, 0.3);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 50px rgba(0, 255, 245, 0.8), 0 0 80px rgba(157, 78, 221, 0.6);
+                transform: scale(1.02);
+            }
+        }
+
+        .start-btn:disabled {
+            background: rgba(65, 90, 119, 0.5);
+            color: #778DA9;
+            cursor: not-allowed;
+            box-shadow: none;
+            animation: none;
+        }
+
+        .start-btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        .requirement-text {
+            font-size: 14px;
+            color: #778DA9;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .players-grid {
+                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 0 20px;
+                height: auto;
+                min-height: 80px;
+                flex-wrap: wrap;
+                gap: 16px;
+                justify-content: center;
+            }
+
+            .header-logo {
+                font-size: 20px;
+                order: 1;
+            }
+
+            .game-code-display {
+                order: 2;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .code-value {
+                font-size: 36px;
+            }
+
+            .leave-btn {
+                order: 3;
+            }
+
+            .container {
+                padding: 20px 20px 140px;
+            }
+
+            .section-title {
+                font-size: 32px;
+            }
+
+            .players-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .start-btn {
+                width: 280px;
+                height: 56px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background -->
+    <div class="background"></div>
+
+    <!-- Ritual Circle -->
+    <div class="ritual-circle">
+        <svg width="900" height="900" viewBox="0 0 900 900">
+            <defs>
+                <linearGradient id="circleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#00FFF5;stop-opacity:0.3"></stop>
+                    <stop offset="50%" style="stop-color:#9D4EDD;stop-opacity:0.3"></stop>
+                    <stop offset="100%" style="stop-color:#FF6B9D;stop-opacity:0.3"></stop>
+                </linearGradient>
+            </defs>
+            <!-- Outer circle -->
+            <circle cx="450" cy="450" r="400" fill="none" stroke="url(#circleGradient)" stroke-width="2"></circle>
+            <circle cx="450" cy="450" r="350" fill="none" stroke="url(#circleGradient)" stroke-width="1" opacity="0.5"></circle>
+            <circle cx="450" cy="450" r="300" fill="none" stroke="url(#circleGradient)" stroke-width="2"></circle>
+            <!-- Inner patterns -->
+            <path d="M450 150 L450 750 M150 450 L750 450" stroke="url(#circleGradient)" stroke-width="1" opacity="0.3"></path>
+            <path d="M250 250 L650 650 M650 250 L250 650" stroke="url(#circleGradient)" stroke-width="1" opacity="0.3"></path>
+            <!-- Mystical symbols -->
+            <circle cx="450" cy="50" r="8" fill="#00FFF5" opacity="0.6"></circle>
+            <circle cx="450" cy="850" r="8" fill="#00FFF5" opacity="0.6"></circle>
+            <circle cx="50" cy="450" r="8" fill="#9D4EDD" opacity="0.6"></circle>
+            <circle cx="850" cy="450" r="8" fill="#9D4EDD" opacity="0.6"></circle>
+            <circle cx="200" cy="200" r="8" fill="#FF6B9D" opacity="0.6"></circle>
+            <circle cx="700" cy="700" r="8" fill="#FF6B9D" opacity="0.6"></circle>
+            <circle cx="700" cy="200" r="8" fill="#FF6B9D" opacity="0.6"></circle>
+            <circle cx="200" cy="700" r="8" fill="#FF6B9D" opacity="0.6"></circle>
+        </svg>
+    </div>
+
+    <!-- Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-logo">THE IMPOSTOR GAME</div>
+        <div class="game-code-display" onclick="copyGameCode()">
+            <span class="code-label">CODE:</span>
+            <span class="code-value" id="gameCode">XY7Z4M</span>
+            <i class="fas fa-copy copy-icon"></i>
+        </div>
+        <button class="leave-btn" onclick="leaveGame()">
+            <i class="fas fa-door-open"></i> Leave Game
+        </button>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Left Section - Players -->
+        <div class="players-section">
+            <h2 class="section-title">Summoning Circle</h2>
+            <div class="players-grid" id="playersGrid">
+                <!-- Player 1 - Host -->
+                <div class="player-card ready">
+                    <div class="player-avatar">
+                        <i class="fas fa-user"></i>
+                        <i class="fas fa-crown host-crown"></i>
+                    </div>
+                    <div class="player-name">Shadow_Master</div>
+                    <div class="player-status">Ready</div>
+                </div>
+
+                <!-- Player 2 -->
+                <div class="player-card ready">
+                    <div class="player-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="player-name">Mystic_Owl</div>
+                    <div class="player-status">Ready</div>
+                </div>
+
+                <!-- Player 3 -->
+                <div class="player-card">
+                    <div class="player-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="player-name">Lunar_Fox</div>
+                    <div class="player-status">Not Ready</div>
+                </div>
+
+                <!-- Player 4 -->
+                <div class="player-card ready">
+                    <div class="player-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="player-name">Storm_Rider</div>
+                    <div class="player-status">Ready</div>
+                </div>
+
+                <!-- Player 5 -->
+                <div class="player-card ready">
+                    <div class="player-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="player-name">Echo_Sage</div>
+                    <div class="player-status">Ready</div>
+                </div>
+
+                <!-- Empty Slot 1 -->
+                <div class="player-card empty">
+                    <div class="player-avatar">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <div class="empty-slot-text">Waiting...</div>
+                </div>
+
+                <!-- Empty Slot 2 -->
+                <div class="player-card empty">
+                    <div class="player-avatar">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <div class="empty-slot-text">Waiting...</div>
+                </div>
+
+                <!-- Empty Slot 3 -->
+                <div class="player-card empty">
+                    <div class="player-avatar">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <div class="empty-slot-text">Waiting...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Section - Info & Settings -->
+        <div class="info-section">
+            <!-- Players Ready Counter -->
+            <div class="info-panel">
+                <div class="ready-counter">
+                    <div class="counter-circle">
+                        <svg width="160" height="160" viewBox="0 0 160 160">
+                            <defs>
+                                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#9D4EDD;stop-opacity:1"></stop>
+                                    <stop offset="100%" style="stop-color:#00FFF5;stop-opacity:1"></stop>
+                                </linearGradient>
+                            </defs>
+                            <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(65, 90, 119, 0.3)" stroke-width="8"></circle>
+                            <circle cx="80" cy="80" r="70" fill="none" stroke="url(#progressGradient)" stroke-width="8" stroke-dasharray="440" stroke-dashoffset="165" stroke-linecap="round" transform="rotate(-90 80 80)" style="filter: drop-shadow(0 0 10px rgba(0, 255, 245, 0.5))">
+                                <animate attributeName="stroke-dashoffset" from="440" to="165" dur="1s" fill="freeze"></animate>
+                            </circle>
+                        </svg>
+                        <div class="counter-value">5/8</div>
+                    </div>
+                    <div class="counter-status">Waiting for more players...</div>
+                </div>
+            </div>
+
+            <!-- Game Settings (Host Only) -->
+            <div class="info-panel settings-panel">
+                <h3 class="panel-header">Game Settings</h3>
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <span>Round Duration</span>
+                        <span class="setting-value" id="roundDuration">60s</span>
+                    </div>
+                    <input type="range" class="slider" min="30" max="120" value="60" id="roundSlider" oninput="updateRoundDuration(this.value)">
+                </div>
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <span>Voting Time</span>
+                        <span class="setting-value" id="votingTime">45s</span>
+                    </div>
+                    <input type="range" class="slider" min="20" max="90" value="45" id="votingSlider" oninput="updateVotingTime(this.value)">
+                </div>
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <span>Category</span>
+                    </div>
+                    <select class="dropdown" id="categorySelect">
+                        <option value="animals">Animals</option>
+                        <option value="food">Food &amp; Drinks</option>
+                        <option value="places">Places</option>
+                        <option value="objects">Objects</option>
+                        <option value="activities">Activities</option>
+                        <option value="random">Random Mix</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Invite Friends -->
+            <div class="info-panel invite-panel">
+                <h3 class="panel-header">Invite Friends</h3>
+                <button class="invite-btn" onclick="shareLink()">
+                    <i class="fas fa-share-alt"></i>
+                    Share Link
+                </button>
+                <button class="invite-btn" onclick="showQRCode()">
+                    <i class="fas fa-qrcode"></i>
+                    Show QR Code
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start Button -->
+    <div class="start-button-container">
+        <button class="start-btn ready" onclick="startGame()" id="startBtn">
+            <span class="btn-text">START GAME</span>
+        </button>
+        <div class="requirement-text">5 players ready • Minimum 4 required</div>
+    </div>
+
+    <script>
+        // Particle System
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = 30;
+
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 8 + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // Copy Game Code
+        function copyGameCode() {
+            const code = document.getElementById('gameCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                // Visual feedback
+                const display = document.querySelector('.game-code-display');
+                const originalText = display.innerHTML;
+                display.innerHTML = '<span class="code-label" style="color: #00FFF5;">Copied!</span>';
+                setTimeout(() => {
+                    display.innerHTML = originalText;
+                }, 1500);
+            });
+        }
+
+        // Update Settings
+        function updateRoundDuration(value) {
+            document.getElementById('roundDuration').textContent = value + 's';
+        }
+
+        function updateVotingTime(value) {
+            document.getElementById('votingTime').textContent = value + 's';
+        }
+
+        // Button Actions
+        function leaveGame() {
+            if (confirm('Are you sure you want to leave the game?')) {
+                alert('Leaving game... (Would navigate back to home)');
+            }
+        }
+
+        function startGame() {
+            alert('Starting game... (Would navigate to game screen)');
+        }
+
+        function shareLink() {
+            const code = document.getElementById('gameCode').textContent;
+            const link = `https://whisperinggame.com/join/${code}`;
+            navigator.clipboard.writeText(link).then(() => {
+                alert('Game link copied to clipboard!');
+            });
+        }
+
+        function showQRCode() {
+            alert('QR Code would be displayed in a modal');
+        }
+
+        // Check if enough players to start
+        function updateStartButton() {
+            const startBtn = document.getElementById('startBtn');
+            const readyPlayers = document.querySelectorAll('.player-card.ready:not(.empty)').length;
+            
+            if (readyPlayers >= 4) {
+                startBtn.disabled = false;
+                startBtn.classList.add('ready');
+            } else {
+                startBtn.disabled = true;
+                startBtn.classList.remove('ready');
+            }
+        }
+
+        // Initial check
+        updateStartButton();
+
+        // Simulate player status changes (for demo)
+        setInterval(() => {
+            const notReadyPlayers = document.querySelectorAll('.player-card:not(.ready):not(.empty)');
+            if (notReadyPlayers.length > 0 && Math.random() > 0.7) {
+                const randomPlayer = notReadyPlayers[Math.floor(Math.random() * notReadyPlayers.length)];
+                randomPlayer.classList.add('ready');
+                randomPlayer.querySelector('.player-status').textContent = 'Ready';
+                updateStartButton();
+            }
+        }, 3000);
+    </script>
+
+</body></html>

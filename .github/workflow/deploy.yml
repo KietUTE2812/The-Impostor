@@ -1,0 +1,44 @@
+name: CI/CD Deploy The-Impostor
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy to VPS
+      uses: appleboy/ssh-action@v1.0.3 # Bot SSH action
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          # 1. Navigate to the project directory
+          cd ~/The-Impostor
+          
+          # 2. Pull the latest code from main branch
+          # (If VPS asks for user/pass, remember to set up deploy key or token beforehand)
+          git pull origin main
+          
+          # --- HANDLE BACKEND (Port 3001) ---
+          echo "🚀 Deploying Backend..."
+          cd backend
+          npm install
+          # Restart tiến trình backend đã chạy
+          pm2 restart backend-api 
+          
+          # --- HANDLE FRONTEND (NextJS - Port 3000) ---
+          echo "🚀 Deploying Frontend..."
+          cd ../frontend
+          npm install
+          
+          # Rebuild NextJS (Important: This step consumes RAM, ensure Swap RAM is enabled)
+          echo "🛠 Building NextJS..."
+          npm run build
+          
+          # Restart frontend process
+          pm2 restart nextjs-frontend
+          
+          echo "✅ Deploy successful!"

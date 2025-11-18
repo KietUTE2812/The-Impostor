@@ -1,34 +1,113 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { GameProvider, useGame } from '@/contexts/GameContext';
 import Lobby from '@/components/Lobby';
 import Room from '@/components/Room';
 import GameScreen from '@/components/GameScreen';
-import { GameProvider } from '@/contexts/GameContext';
+import ErrorModal from '@/components/ErrorModal';
+
+// Background component with animated starfield
+function Background() {
+  return (
+    <div className="background">
+    </div>
+  );
+}
+
+// Animated particles
+function Particles() {
+  const [particles, setParticles] = useState<{ left: string; top: string; animationDelay: string; animationDuration: string }[]>([]);
+
+  useEffect(() => {
+    const newParticles = Array.from({ length: 30 }, () => ({
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      animationDelay: `${Math.random() * 5}s`,
+      animationDuration: `${5 + Math.random() * 10}s`
+    }));
+    setParticles(newParticles);
+  }, []);
+
+  return (
+    <div className="particles">
+      {particles.map((particle, i) => (
+        <div
+          key={i}
+          className="particle"
+          style={{
+            left: particle.left,
+            top: particle.top,
+            animationDelay: particle.animationDelay,
+            animationDuration: particle.animationDuration
+          }}
+        ></div>
+      ))}
+    </div>
+  );
+}
+
+// Decorative orbs
+function DecorativeOrbs() {
+  return (
+    <>
+      <div className="decorative-orb orb-1"></div>
+      <div className="decorative-orb orb-2"></div>
+      <div className="decorative-orb orb-3"></div>
+    </>
+  );
+}
+
+// Main game content wrapper
+function GameContent() {
+  const { roomId, gameState, leaveRoom, errorMessage } = useGame();
+  const [view, setView] = useState<'lobby' | 'room' | 'game'>('lobby');
+
+  useEffect(() => {
+    console.log('roomId:', roomId, 'gameState:', gameState);
+    if (roomId && gameState === 'LOBBY') {
+      setView('room');
+    } else if (gameState && gameState !== 'LOBBY') {
+      setView('game');
+    } else if (!roomId) {
+      setView('lobby');
+    }
+  }, [roomId, gameState]);
+
+  const handleJoinedRoom = () => {
+    setView('room');
+  };
+
+  const handleStartGame = () => {
+    setView('game');
+  };
+
+  const handleLeaveRoom = () => {
+    leaveRoom();
+    setView('lobby');
+  };
+
+  return (
+    <>
+      {errorMessage && <ErrorModal message={errorMessage} onClose={() => {
+        setView('room');
+      }} />}
+      {view === 'lobby' && <Lobby onJoined={handleJoinedRoom} />}
+      {view === 'room' && <Room onStartGame={handleStartGame} onLeave={handleLeaveRoom} />}
+      {view === 'game' && <GameScreen />}
+    </>
+  );
+}
 
 export default function Home() {
   return (
     <GameProvider>
-      <main className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center p-4">
-        <div className="w-full max-w-4xl">
-          <h1 className="text-5xl font-bold text-white text-center mb-8 drop-shadow-lg">
-            🕵️ Word Impostor
-          </h1>
-          <GameContent />
-        </div>
+      <main className="main-container">
+        <Background />
+        <Particles />
+        <DecorativeOrbs />
+        <GameContent />
       </main>
     </GameProvider>
-  );
-}
-
-function GameContent() {
-  const [view, setView] = useState<'lobby' | 'room' | 'game'>('lobby');
-
-  return (
-    <div className="bg-white rounded-2xl shadow-2xl p-8">
-      {view === 'lobby' && <Lobby onJoinRoom={() => setView('room')} />}
-      {view === 'room' && <Room onStartGame={() => setView('game')} onLeave={() => setView('lobby')} />}
-      {view === 'game' && <GameScreen onGameEnd={() => setView('room')} />}
-    </div>
   );
 }

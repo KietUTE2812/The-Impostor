@@ -296,7 +296,7 @@ class GameManager {
       isImpostor,
       winner,
       keyword: this.keyword,
-      votes: voteCountsDetailed
+      votes: this.votes
     });
   }
 
