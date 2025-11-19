@@ -69,6 +69,11 @@ io.on('connection', (socket) => {
       return;
     }
 
+    if (gameManager.players.some(p => p.username === username)) {
+      socket.emit('error', { message: 'Username already taken in this room' });
+      return;
+    }
+
     socket.join(roomId);
     gameManager.addPlayer(socket.id, username, false);
     

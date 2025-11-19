@@ -46,6 +46,7 @@ interface GameContextType {
   totalRounds: number;
   wordHistory: WordHistoryItem[];
   errorMessage: string | null;
+  setErrorMessage: (message: string | null) => void;
   createRoom: () => void;
   joinRoom: (roomId: string) => void;
   leaveRoom: () => void;
@@ -94,7 +95,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
     });
 
     socket.on('joinedRoom', ({ roomId, players }) => {
-      console.log('Joined room:', roomId);
       setRoomId(roomId);
       setPlayers(players);
       setIsHost(false);
@@ -234,6 +234,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     totalRounds,
     wordHistory,
     errorMessage,
+    setErrorMessage,
     createRoom,
     joinRoom,
     leaveRoom,
