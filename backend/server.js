@@ -165,10 +165,11 @@ io.on('connection', (socket) => {
       if (gameManager.hasPlayer(socket.id)) {
         gameManager.removePlayer(socket.id);
 
-        io.in(roomId).emit('gamePaused', { 
-          reason: 'A player has disconnected.',
-          players: gameManager.getPlayers()
-         });
+        if (gameManager.gameState !== 'LOBBY') {
+          gameManager.io.in(roomId).emit('gamePaused', { reason: 'A player has disconnected', players: gameManager.getPlayers() });
+          gameManager.gameState = 'LOBBY';
+        }
+
         console.log(`Player ${socket.id} disconnected and removed from room ${roomId}`);
         
         // If room is empty, delete it

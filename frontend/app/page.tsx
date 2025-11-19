@@ -61,6 +61,7 @@ function DecorativeOrbs() {
 // Main game content wrapper
 function GameContent() {
   const { roomId, gameState, leaveRoom, errorMessage } = useGame();
+  const [error, setError] = useState<string | null>(errorMessage);
   const [view, setView] = useState<'lobby' | 'room' | 'game'>('lobby');
 
   useEffect(() => {
@@ -89,8 +90,8 @@ function GameContent() {
 
   return (
     <>
-      {errorMessage && <ErrorModal message={errorMessage} onClose={() => {
-        setView('room');
+      {error && <ErrorModal message={error} onClose={() => {
+        setError(null);
       }} />}
       {view === 'lobby' && <Lobby onJoined={handleJoinedRoom} />}
       {view === 'room' && <Room onStartGame={handleStartGame} onLeave={handleLeaveRoom} />}

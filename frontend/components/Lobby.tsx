@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState } from 'react';
 import { useGame } from '@/contexts/GameContext';
+import ErrorModal from './ErrorModal';
 
 interface LobbyProps {
   onJoined: () => void;
@@ -11,6 +12,7 @@ export default function Lobby({ onJoined }: LobbyProps) {
   const {socket, username, setUsername, createRoom, joinRoom } = useGame();
   const [joinRoomId, setJoinRoomId] = useState('');
   const [globalState, setGlobalState] = useState<{ totalPlayers: number; totalRooms: number }>({ totalPlayers: 0, totalRooms: 0 });
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const handleGlobalStatsUpdate = (data: { totalPlayers: number; totalRooms: number }) => {
@@ -28,7 +30,7 @@ export default function Lobby({ onJoined }: LobbyProps) {
       createRoom();
       onJoined();
     } else {
-      alert('Please enter your username');
+      setErrorMessage('Please enter your username');
     }
   };
 
@@ -37,7 +39,7 @@ export default function Lobby({ onJoined }: LobbyProps) {
       joinRoom(joinRoomId.toUpperCase());
       onJoined();
     } else {
-      alert('Please enter your username and room ID');
+      setErrorMessage('Please enter your username and room ID');
     }
   };
 
@@ -74,62 +76,7 @@ export default function Lobby({ onJoined }: LobbyProps) {
         </div>
 
         {/* Main Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-[40%_60%] gap-12 max-w-[1200px] mx-auto px-5">
-          {/* How to Play Panel */}
-          <div 
-            className="rounded-xl p-8 transition-all duration-400 hover:-translate-y-1"
-            style={{
-              background: 'rgba(27, 38, 59, 0.8)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(0, 255, 245, 0.2)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = '0 12px 48px rgba(0, 255, 245, 0.2)';
-              e.currentTarget.style.borderColor = 'rgba(0, 255, 245, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.3)';
-              e.currentTarget.style.borderColor = 'rgba(0, 255, 245, 0.2)';
-            }}
-          >
-            <h2 
-              className="text-[clamp(28px,3vw,36px)] font-semibold text-center mb-8"
-              style={{
-                fontFamily: "'Cinzel', serif",
-                color: '#00FFF5',
-                letterSpacing: '2px',
-                textShadow: '0 0 20px rgba(0, 255, 245, 0.6)'
-              }}
-            >
-              How to Play
-            </h2>
-            <ul className="space-y-6">
-              {[
-                { icon: 'fa-users', text: '4-8 players required to start' },
-                { icon: 'fa-mask', text: 'One player is secretly the Impostor' },
-                { icon: 'fa-key', text: 'Crewmates know the secret keyword' },
-                { icon: 'fa-question-circle', text: 'Impostor only knows the category' },
-                { icon: 'fa-comments', text: 'Say words related to the keyword without being too obvious!' }
-              ].map((rule, index) => (
-                <li 
-                  key={index}
-                  className="flex items-start text-base leading-relaxed transition-all duration-300 hover:translate-x-1"
-                >
-                  <div 
-                    className="min-w-[32px] h-8 flex items-center justify-center mr-4 text-lg transition-all duration-300"
-                    style={{
-                      color: '#9D4EDD',
-                      filter: 'drop-shadow(0 0 8px rgba(157, 78, 221, 0.6))'
-                    }}
-                  >
-                    <i className={`fas ${rule.icon}`}></i>
-                  </div>
-                  <span>{rule.text}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-[50%_50%] gap-12 max-w-[1200px] mx-auto px-5">
 
           {/* Action Panel */}
           <div className="flex flex-col justify-center items-center gap-8">
@@ -275,6 +222,61 @@ export default function Lobby({ onJoined }: LobbyProps) {
               </div>
             </div>
           </div>
+          {/* How to Play Panel */}
+                    <div 
+                      className="rounded-xl p-8 transition-all duration-400 hover:-translate-y-1"
+                      style={{
+                        background: 'rgba(27, 38, 59, 0.8)',
+                        backdropFilter: 'blur(10px)',
+                        border: '1px solid rgba(0, 255, 245, 0.2)',
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.boxShadow = '0 12px 48px rgba(0, 255, 245, 0.2)';
+                        e.currentTarget.style.borderColor = 'rgba(0, 255, 245, 0.4)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.3)';
+                        e.currentTarget.style.borderColor = 'rgba(0, 255, 245, 0.2)';
+                      }}
+                    >
+                      <h2 
+                        className="text-[clamp(28px,3vw,36px)] font-semibold text-center mb-8"
+                        style={{
+                          fontFamily: "'Cinzel', serif",
+                          color: '#00FFF5',
+                          letterSpacing: '2px',
+                          textShadow: '0 0 20px rgba(0, 255, 245, 0.6)'
+                        }}
+                      >
+                        How to Play
+                      </h2>
+                      <ul className="space-y-6">
+                        {[
+                          { icon: 'fa-users', text: '4-8 players required to start' },
+                          { icon: 'fa-mask', text: 'One player is secretly the Impostor' },
+                          { icon: 'fa-key', text: 'Crewmates know the secret keyword' },
+                          { icon: 'fa-question-circle', text: 'Impostor only knows the category' },
+                          { icon: 'fa-comments', text: 'Say words related to the keyword without being too obvious!' }
+                        ].map((rule, index) => (
+                          <li 
+                            key={index}
+                            className="flex items-start text-base leading-relaxed transition-all duration-300 hover:translate-x-1"
+                          >
+                            <div 
+                              className="min-w-[32px] h-8 flex items-center justify-center mr-4 text-lg transition-all duration-300"
+                              style={{
+                                color: '#9D4EDD',
+                                filter: 'drop-shadow(0 0 8px rgba(157, 78, 221, 0.6))'
+                              }}
+                            >
+                              <i className={`fas ${rule.icon}`}></i>
+                            </div>
+                            <span>{rule.text}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>          
         </div>
       </div>
 
@@ -304,6 +306,9 @@ export default function Lobby({ onJoined }: LobbyProps) {
           </div>
         </div>
       </div>
+      {errorMessage && (
+        <ErrorModal message={errorMessage} onClose={() => setErrorMessage(null)} />
+      )}
     </div>
   );
 }
