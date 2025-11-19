@@ -100,8 +100,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       setIsHost(false);
     });
 
-    socket.on('roomUpdate', ({ players }) => {
+    socket.on('roomUpdate', ({ players } : { players: Player[] }) => {
       setPlayers(players);
+      setIsHost(players.find(p => p.socketId === socket.id)?.isHost || false);
     });
 
     // Game events

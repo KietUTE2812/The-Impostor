@@ -12,6 +12,8 @@ export default function Room({ onStartGame, onLeave }: RoomProps) {
   const { roomId, players, isHost, startGame, socket } = useGame();
   const [isCopy, setIsCopy] = useState(false);
 
+  console.log('Room component players:', isHost, players);
+
   const handleStartGame = () => {
     if (players.length < 4) {
       alert('Need at least 4 players to start!');
