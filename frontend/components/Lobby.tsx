@@ -30,7 +30,7 @@ export default function Lobby({ onJoined }: LobbyProps) {
       createRoom();
       onJoined();
     } else {
-      setErrorMessage('Please enter your username');
+      setErrorMessage('Please enter your name');
     }
   };
 
@@ -39,7 +39,7 @@ export default function Lobby({ onJoined }: LobbyProps) {
       joinRoom(joinRoomId.toUpperCase());
       onJoined();
     } else {
-      setErrorMessage('Please enter your username and room ID');
+      setErrorMessage('Please enter your name and game code');
     }
   };
 
